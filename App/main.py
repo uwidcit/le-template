@@ -1,7 +1,6 @@
 import os, csv
-from flask import Flask, redirect, render_template, jsonify, request, send_from_directory, flash, url_for
-from sqlalchemy.exc import OperationalError, IntegrityError
-from App.models import db, User, Student, Review
+from flask import Flask, redirect, render_template, request, flash, url_for
+from App.models import db, User
 from datetime import timedelta
 
 from flask_jwt_extended import (
@@ -59,44 +58,12 @@ def expired_token_callback(jwt_header, jwt_payload):
   return redirect(url_for('login'))
 
 
-def parse_students():
-  with open('students.csv', mode='r', encoding='utf-8') as file:
-    csv_reader = csv.DictReader(file)
-    for row in csv_reader:
-      student = Student(id=row['ID'],
-                        first_name=row['FirstName'],
-                        image=row['Picture'],
-                        last_name=row['LastName'],
-                        programme=row['Programme'],
-                        start_year=row['YearStarted'])
-      db.session.add(student)
-    db.session.commit()
-
-def create_reviews():
-  review1 = Review(student_id='820321819', user_id=1, text='This is a review 1', rating=4)
-  review2 = Review(student_id='820321819', user_id=2, text='This is a review 2', rating=2)
-  review3 = Review(student_id='820321819', user_id=3, text='This is a review 3', rating=3)
-  review4 = Review(student_id='820321819', user_id=2, text='This is a review 4', rating=1)
-  review5 = Review(student_id='820321819', user_id=1, text='This is a review 5', rating=4)
-  db.session.add_all([review1, review2, review3, review4, review5])
-  db.session.commit()
-
-def create_users():
-  rob = User(username="rob", password="robpass")
-  bob = User(username="bob", password="bobpass")
-  sally = User(username="sally", password="sallypass")
-  pam = User(username="pam", password="pampass")
-  chris = User(username="chris", password="chrispass")
-  db.session.add_all([rob, bob, sally, pam, chris])
-  db.session.commit()
-
-
 def initialize_db():
   db.drop_all()
   db.create_all()
-  create_users()
-  # create_reviews()
-  # parse_students()
+  bob = User('bob', 'bobpass')
+  db.session.add(bob)
+  db.session.commit()
   print('database intialized')
 
 
@@ -121,12 +88,12 @@ def login_action():
 
 
 @app.route('/app')
-@app.route('/app/<student_id>')
 @jwt_required()
-def home(student_id=820321819):
-  return render_template('index.html', students=None, user=current_user, selected_student=None)
+def home():
+  return render_template('index.html')
 
 @app.route('/logout')
+@jwt_required()
 def logout():
   response = redirect(url_for('login'))
   unset_jwt_cookies(response)

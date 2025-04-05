@@ -17,9 +17,3 @@ class User(db.Model):
 
   def check_password(self, password):
     return check_password_hash(self.password, password)
-    
-class Student(db.Model):
-  id = db.Column(db.String(9), primary_key=True)
-  
-class Review(db.Model):
-  id = db.Column(db.Integer, primary_key=True)

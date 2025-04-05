@@ -1,6 +1,6 @@
 import os, csv
 from flask import Flask, redirect, render_template, request, flash, url_for
-from App.models import db, User
+from App.models import *
 from datetime import timedelta
 
 from flask_jwt_extended import (
